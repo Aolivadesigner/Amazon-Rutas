@@ -1,69 +1,92 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gestión Paquetería</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amazon Flex App</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 </head>
 <body>
 
-  <!-- Menú lateral -->
-  <nav id="sidebar">
-    <button id="closeSidebar">✖</button>
-    <ul>
-      <li><a href="#" onclick="mostrarSeccion('inicio')">Inicio</a></li>
-      <li><a href="#" onclick="mostrarSeccion('estadisticas')">Estadísticas</a></li>
-      <li><a href="#" onclick="mostrarSeccion('historico')">Histórico</a></li>
-    </ul>
-  </nav>
-  <button id="openSidebar">☰ Menú</button>
+<header>
+  <div><span class="hamburger" onclick="toggleMenu()">☰</span> Amazon Flex</div>
+  <button onclick="guardarJornada()">Guardar</button>
+</header>
 
-  <!-- Contenido principal -->
-  <main id="contenido">
-    <!-- Sección Inicio -->
-    <section id="inicio" class="seccion activa">
-      <h1>Gestión de Paquetería</h1>
-      <div class="jornada">
-        <button id="btnIniciar">Iniciar Jornada</button>
-        <button id="btnFinalizar">Finalizar Jornada</button>
-        <p id="cronometro">00:00:00</p>
-        <p>Paquetes: <span id="contadorPaquetes">0</span></p>
-        <button id="btnNuevoPaquete">Nuevo Paquete</button>
-      </div>
-    </section>
+<aside id="menu">
+  <button onclick="showSection('info'); toggleMenu()">Info jornada</button>
+  <button onclick="showSection('paquetes'); toggleMenu()">Paquetes</button>
+  <button onclick="showSection('estadisticas'); toggleMenu()">Estadísticas</button>
+  <button onclick="cargarHistorico(); toggleMenu()">Histórico jornadas</button>
+</aside>
 
-    <!-- Sección Estadísticas -->
-    <section id="estadisticas" class="seccion">
-      <h2>Estadísticas</h2>
-      <div id="resumen"></div>
-    </section>
+<main>
+  <div id="info" class="section">
+    <label>Fecha</label>
+    <input type="date" id="fecha">
 
-    <!-- Sección Histórico -->
-    <section id="historico" class="seccion">
-      <h2>Histórico de Jornadas</h2>
-      <ul id="listaHistorico"></ul>
-    </section>
-  </main>
+    <label>Ruta / Área</label>
+    <input type="text" id="ruta">
 
-  <!-- Modal Nuevo Paquete -->
-  <div id="modalPaquete" class="modal">
-    <div class="modal-contenido">
-      <span id="cerrarModal" class="cerrar">&times;</span>
-      <h3>Nuevo Paquete</h3>
-      <label>Ruta:</label>
-      <input type="text" id="ruta" placeholder="Ej: Calle Mayor 15">
-      <button onclick="subirOCR()">📷 OCR Dirección</button>
-      <br><br>
-      <label>VIN:</label>
-      <input type="text" id="vin" placeholder="VIN o QR">
-      <button onclick="escanearQR()">📷 Escanear VIN</button>
-      <br><br>
-      <button id="guardarPaquete">Guardar Paquete</button>
+    <label>Bolsas</label>
+    <input type="number" id="bolsas">
+
+    <label>Paquetes desbordamiento</label>
+    <input type="number" id="desbordamiento">
+
+    <label>Matrícula / VIN</label>
+    <input type="text" id="vin">
+    <button onclick="scanQR()">Escanear QR VIN</button>
+    <button onclick="subirOCR()">OCR Flex</button>
+
+    <button onclick="iniciarJornada()">Iniciar jornada</button>
+    <button onclick="finalizarJornada()">Finalizar jornada</button>
+    <p>Tiempo transcurrido: <span id="contador">00:00:00</span></p>
+
+    <div class="totales">
+      <span>Total entregados: <span id="totalEntregados">0</span></span>
+      <span>Total no entregados: <span id="totalNoEntregados">0</span></span>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script src="script.js"></script>
+  <div id="paquetes" class="section" style="display:none;">
+    <button onclick="openModal()">Añadir paquete</button>
+    <div id="paquetesList"></div>
+  </div>
+
+  <div id="estadisticas" class="section" style="display:none;">
+    <p>Media paquetes/hora: <span id="media">0</span></p>
+    <p>Tiempo jornada: <span id="tiempoJornada">00:00:00</span></p>
+  </div>
+
+  <div id="historico" class="section" style="display:none;"></div>
+</main>
+
+<!-- Modal paquete -->
+<div id="modalPaquete" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <label>Número seguimiento</label>
+    <input type="text" id="pkgSeguimiento">
+    <label>Dirección / Destinatario</label>
+    <input type="text" id="pkgDireccion">
+    <label>Tipo entrega</label>
+    <select id="pkgTipo">
+      <option>Vivienda</option>
+      <option>Comercio</option>
+      <option>Locker</option>
+    </select>
+    <label>Mala geo</label>
+    <input type="checkbox" id="pkgMala">
+    <label>Entregado</label>
+    <input type="checkbox" id="pkgEntregado">
+    <label>Notas / Motivo</label>
+    <textarea id="pkgNotas"></textarea>
+    <button onclick="agregarPaquete()">Guardar paquete</button>
+  </div>
+</div>
+
+<script src="app.js"></script>
 </body>
 </html>
