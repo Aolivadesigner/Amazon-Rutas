@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Amazon Rutas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <h1>📦 Amazon Rutas</h1>
+
+  <!-- Formulario básico para registrar paquetes -->
+  <form id="packageForm">
+    <label for="vin">VIN / Código:</label>
+    <input type="text" id="vin" name="vin" placeholder="Escanear o escribir código" required>
+
+    <br><br>
+
+    <label for="description">Descripción:</label>
+    <input type="text" id="description" name="description" placeholder="Descripción del paquete">
+
+    <br><br>
+
+    <button type="submit">Guardar</button>
+  </form>
+
+  <hr>
+
+  <!-- Lector QR -->
+  <h2>📷 Escanear QR</h2>
+  <video id="qr-video" width="300" height="200" style="border:1px solid #ccc"></video>
+  <p id="qr-result">Resultado: Ninguno</p>
+  <button id="start-qr">Iniciar escáner</button>
+
+  <hr>
+
+  <!-- OCR para leer texto de imágenes -->
+  <h2>📝 OCR desde imagen</h2>
+  <input type="file" id="image-input" accept="image/*">
+  <p id="ocr-result">Texto detectado: Ninguno</p>
+
+  <!-- Librerías externas -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
+
+  <script>
+    // Guardar formulario
+    document.getElementById("packageForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const vin = document.getElementById("vin").value;
+      const description = document.getElementById("description").value;
+      alert("Guardado: " + vin + " - " + description);
+    });
+
+    // Escáner QR
+    const videoElem = document.getElementById("qr-video");
+    const qrResult = document.getElementById("qr-result");
+    const startBtn = document.getElementById("start-qr");
+
+    startBtn.addEventListener("click", () => {
+      const html5QrCode = new Html5Qrcode("qr-video");
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        (decodedText) => {
+          qrResult.textContent = "Resultado: " + decodedText;
+          document.getElementById("vin").value = decodedText; // Autorellena el VIN
+        },
+        (errorMessage) => {
+          console.log("Error QR: ", errorMessage);
+        }
+      ).catch(err => {
+        console.error("No se pudo iniciar el escáner: ", err);
+      });
+    });
+
+    // OCR
+    document.getElementById("image-input").addEventListener("change", async (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const resultElem = document.getElementById("ocr-result");
+        resultElem.textContent = "Procesando...";
+        const { data: { text } } = await Tesseract.recognize(file, 'eng');
+        resultElem.textContent = "Texto detectado: " + text;
+        document.getElementById("vin").value = text.trim(); // Autorellena VIN
+      }
+    });
+  </script>
+</body>
+</html>
