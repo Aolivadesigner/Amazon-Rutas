@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Amazon Flex App</title>
 <link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
 </head>
 <body>
 
@@ -14,79 +13,20 @@
   <button onclick="guardarJornada()">Guardar</button>
 </header>
 
-<aside id="menu">
-  <button onclick="showSection('info'); toggleMenu()">Info jornada</button>
-  <button onclick="showSection('paquetes'); toggleMenu()">Paquetes</button>
-  <button onclick="showSection('estadisticas'); toggleMenu()">Estadísticas</button>
-  <button onclick="cargarHistorico(); toggleMenu()">Histórico jornadas</button>
+<aside id="menu" class="menu-lateral">
+  <button onclick="loadSection('info')">Info jornada</button>
+  <button onclick="loadSection('paquetes')">Paquetes</button>
+  <button onclick="loadSection('estadisticas')">Estadísticas</button>
+  <button onclick="loadSection('historico')">Histórico jornadas</button>
 </aside>
 
-<main>
-  <div id="info" class="section">
-    <label>Fecha</label>
-    <input type="date" id="fecha">
-
-    <label>Ruta / Área</label>
-    <input type="text" id="ruta">
-
-    <label>Bolsas</label>
-    <input type="number" id="bolsas">
-
-    <label>Paquetes desbordamiento</label>
-    <input type="number" id="desbordamiento">
-
-    <label>Matrícula / VIN</label>
-    <input type="text" id="vin">
-    <button onclick="scanQR()">Escanear QR VIN</button>
-    <button onclick="subirOCR()">OCR Flex</button>
-
-    <button onclick="iniciarJornada()">Iniciar jornada</button>
-    <button onclick="finalizarJornada()">Finalizar jornada</button>
-    <p>Tiempo transcurrido: <span id="contador">00:00:00</span></p>
-
-    <div class="totales">
-      <span>Total entregados: <span id="totalEntregados">0</span></span>
-      <span>Total no entregados: <span id="totalNoEntregados">0</span></span>
-    </div>
-  </div>
-
-  <div id="paquetes" class="section" style="display:none;">
-    <button onclick="openModal()">Añadir paquete</button>
-    <div id="paquetesList"></div>
-  </div>
-
-  <div id="estadisticas" class="section" style="display:none;">
-    <p>Media paquetes/hora: <span id="media">0</span></p>
-    <p>Tiempo jornada: <span id="tiempoJornada">00:00:00</span></p>
-  </div>
-
-  <div id="historico" class="section" style="display:none;"></div>
+<main id="contenido">
+  <!-- Aquí se cargará la sección seleccionada -->
 </main>
 
-<!-- Modal paquete -->
-<div id="modalPaquete" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeModal()">&times;</span>
-    <label>Número seguimiento</label>
-    <input type="text" id="pkgSeguimiento">
-    <label>Dirección / Destinatario</label>
-    <input type="text" id="pkgDireccion">
-    <label>Tipo entrega</label>
-    <select id="pkgTipo">
-      <option>Vivienda</option>
-      <option>Comercio</option>
-      <option>Locker</option>
-    </select>
-    <label>Mala geo</label>
-    <input type="checkbox" id="pkgMala">
-    <label>Entregado</label>
-    <input type="checkbox" id="pkgEntregado">
-    <label>Notas / Motivo</label>
-    <textarea id="pkgNotas"></textarea>
-    <button onclick="agregarPaquete()">Guardar paquete</button>
-  </div>
-</div>
-
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode/minified/html5-qrcode.min.js"></script>
 <script src="app.js"></script>
+
 </body>
 </html>
