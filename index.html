@@ -2,88 +2,68 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Amazon Rutas</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión Paquetería</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>📦 Amazon Rutas</h1>
 
-  <!-- Formulario básico para registrar paquetes -->
-  <form id="packageForm">
-    <label for="vin">VIN / Código:</label>
-    <input type="text" id="vin" name="vin" placeholder="Escanear o escribir código" required>
+  <!-- Menú lateral -->
+  <nav id="sidebar">
+    <button id="closeSidebar">✖</button>
+    <ul>
+      <li><a href="#" onclick="mostrarSeccion('inicio')">Inicio</a></li>
+      <li><a href="#" onclick="mostrarSeccion('estadisticas')">Estadísticas</a></li>
+      <li><a href="#" onclick="mostrarSeccion('historico')">Histórico</a></li>
+    </ul>
+  </nav>
+  <button id="openSidebar">☰ Menú</button>
 
-    <br><br>
+  <!-- Contenido principal -->
+  <main id="contenido">
+    <!-- Sección Inicio -->
+    <section id="inicio" class="seccion activa">
+      <h1>Gestión de Paquetería</h1>
+      <div class="jornada">
+        <button id="btnIniciar">Iniciar Jornada</button>
+        <button id="btnFinalizar">Finalizar Jornada</button>
+        <p id="cronometro">00:00:00</p>
+        <p>Paquetes: <span id="contadorPaquetes">0</span></p>
+        <button id="btnNuevoPaquete">Nuevo Paquete</button>
+      </div>
+    </section>
 
-    <label for="description">Descripción:</label>
-    <input type="text" id="description" name="description" placeholder="Descripción del paquete">
+    <!-- Sección Estadísticas -->
+    <section id="estadisticas" class="seccion">
+      <h2>Estadísticas</h2>
+      <div id="resumen"></div>
+    </section>
 
-    <br><br>
+    <!-- Sección Histórico -->
+    <section id="historico" class="seccion">
+      <h2>Histórico de Jornadas</h2>
+      <ul id="listaHistorico"></ul>
+    </section>
+  </main>
 
-    <button type="submit">Guardar</button>
-  </form>
+  <!-- Modal Nuevo Paquete -->
+  <div id="modalPaquete" class="modal">
+    <div class="modal-contenido">
+      <span id="cerrarModal" class="cerrar">&times;</span>
+      <h3>Nuevo Paquete</h3>
+      <label>Ruta:</label>
+      <input type="text" id="ruta" placeholder="Ej: Calle Mayor 15">
+      <button onclick="subirOCR()">📷 OCR Dirección</button>
+      <br><br>
+      <label>VIN:</label>
+      <input type="text" id="vin" placeholder="VIN o QR">
+      <button onclick="escanearQR()">📷 Escanear VIN</button>
+      <br><br>
+      <button id="guardarPaquete">Guardar Paquete</button>
+    </div>
+  </div>
 
-  <hr>
-
-  <!-- Lector QR -->
-  <h2>📷 Escanear QR</h2>
-  <video id="qr-video" width="300" height="200" style="border:1px solid #ccc"></video>
-  <p id="qr-result">Resultado: Ninguno</p>
-  <button id="start-qr">Iniciar escáner</button>
-
-  <hr>
-
-  <!-- OCR para leer texto de imágenes -->
-  <h2>📝 OCR desde imagen</h2>
-  <input type="file" id="image-input" accept="image/*">
-  <p id="ocr-result">Texto detectado: Ninguno</p>
-
-  <!-- Librerías externas -->
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2/dist/tesseract.min.js"></script>
-
-  <script>
-    // Guardar formulario
-    document.getElementById("packageForm").addEventListener("submit", function(e) {
-      e.preventDefault();
-      const vin = document.getElementById("vin").value;
-      const description = document.getElementById("description").value;
-      alert("Guardado: " + vin + " - " + description);
-    });
-
-    // Escáner QR
-    const videoElem = document.getElementById("qr-video");
-    const qrResult = document.getElementById("qr-result");
-    const startBtn = document.getElementById("start-qr");
-
-    startBtn.addEventListener("click", () => {
-      const html5QrCode = new Html5Qrcode("qr-video");
-      html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: 250 },
-        (decodedText) => {
-          qrResult.textContent = "Resultado: " + decodedText;
-          document.getElementById("vin").value = decodedText; // Autorellena el VIN
-        },
-        (errorMessage) => {
-          console.log("Error QR: ", errorMessage);
-        }
-      ).catch(err => {
-        console.error("No se pudo iniciar el escáner: ", err);
-      });
-    });
-
-    // OCR
-    document.getElementById("image-input").addEventListener("change", async (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        const resultElem = document.getElementById("ocr-result");
-        resultElem.textContent = "Procesando...";
-        const { data: { text } } = await Tesseract.recognize(file, 'eng');
-        resultElem.textContent = "Texto detectado: " + text;
-        document.getElementById("vin").value = text.trim(); // Autorellena VIN
-      }
-    });
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
