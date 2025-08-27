@@ -1,123 +1,60 @@
-let timer, segundos = 0;
-let jornada = { inicio: null, fin: null, paquetes: [] };
+let jornada = { paquetes: [] };
+let timer = null;
+let tiempoInicio = null;
 
-// =========================
-// Cronómetro
-// =========================
-function iniciarJornada() {
-  jornada.inicio = new Date();
-  segundos = 0;
-  timer = setInterval(() => {
-    segundos++;
-    document.getElementById("cronometro").textContent = formatoTiempo(segundos);
-  }, 1000);
-  localStorage.setItem("jornadaActual", JSON.stringify(jornada));
+// Menú lateral
+function toggleMenu(){
+  const m = document.getElementById('menu');
+  m.classList.toggle('open');
 }
 
-function finalizarJornada() {
-  clearInterval(timer);
-  jornada.fin = new Date();
-  guardarHistorico();
-  localStorage.removeItem("jornadaActual");
-  jornada = { inicio: null, fin: null, paquetes: [] };
-  document.getElementById("cronometro").textContent = "00:00:00";
-  document.getElementById("contadorPaquetes").textContent = "0";
+function showSection(sec){
+  ['info','paquetes','estadisticas','historico'].forEach(s=>document.getElementById(s).style.display='none');
+  document.getElementById(sec).style.display='block';
 }
 
-function formatoTiempo(seg) {
-  let h = String(Math.floor(seg / 3600)).padStart(2, "0");
-  let m = String(Math.floor((seg % 3600) / 60)).padStart(2, "0");
-  let s = String(seg % 60).padStart(2, "0");
-  return `${h}:${m}:${s}`;
+// Contador
+function actualizarContador(){
+  if(!tiempoInicio) return;
+  const diff=new Date()-tiempoInicio;
+  const hrs=String(Math.floor(diff/3600000)).padStart(2,'0');
+  const min=String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+  const sec=String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+  document.getElementById('contador').textContent=`${hrs}:${min}:${sec}`;
+  document.getElementById('tiempoJornada').textContent=`${hrs}:${min}:${sec}`;
+  calcularMedia();
 }
 
-// =========================
-// Paquetes
-// =========================
-function abrirModal() {
-  document.getElementById("modalPaquete").style.display = "block";
+// Iniciar / finalizar jornada
+function iniciarJornada(){ tiempoInicio=new Date(); if(timer) clearInterval(timer); timer=setInterval(actualizarContador,1000);}
+function finalizarJornada(){ clearInterval(timer); actualizarContador();}
+
+// Guardado local
+function guardarJornada(){ 
+  jornada.fecha=document.getElementById('fecha').value;
+  jornada.ruta=document.getElementById('ruta').value;
+  jornada.bolsas=document.getElementById('bolsas').value;
+  jornada.desbordamiento=document.getElementById('desbordamiento').value;
+  jornada.vin=document.getElementById('vin').value;
+  jornada.tiempo=document.getElementById('contador').textContent;
+  localStorage.setItem('jornadaActual', JSON.stringify(jornada));
+  alert('Jornada guardada');
 }
 
-function cerrarModal() {
-  document.getElementById("modalPaquete").style.display = "none";
-}
+// QR y OCR simulados
+function scanQR(){ let qr=prompt("Simula lectura QR VIN:"); if(qr) document.getElementById('vin').value=qr; }
+function subirOCR(){ alert('Simula OCR de Flex aquí'); }
 
-function guardarPaquete() {
-  let ruta = document.getElementById("ruta").value.trim();
-  let vin = document.getElementById("vin").value.trim();
-  if (!ruta || !vin) {
-    alert("Faltan datos");
-    return;
-  }
-  jornada.paquetes.push({ ruta, vin, hora: new Date() });
-  document.getElementById("contadorPaquetes").textContent = jornada.paquetes.length;
-  localStorage.setItem("jornadaActual", JSON.stringify(jornada));
-  cerrarModal();
-  document.getElementById("ruta").value = "";
-  document.getElementById("vin").value = "";
-}
+// Modal paquete
+function openModal(){ document.getElementById('modalPaquete').style.display='flex'; }
+function closeModal(){ document.getElementById('modalPaquete').style.display='none'; }
 
-// =========================
-// Histórico
-// =========================
-function guardarHistorico() {
-  let historico = JSON.parse(localStorage.getItem("historico")) || [];
-  historico.push(jornada);
-  localStorage.setItem("historico", JSON.stringify(historico));
-  actualizarHistorico();
-}
-
-function actualizarHistorico() {
-  let historico = JSON.parse(localStorage.getItem("historico")) || [];
-  let lista = document.getElementById("listaHistorico");
-  lista.innerHTML = "";
-  historico.forEach((j, i) => {
-    let li = document.createElement("li");
-    li.textContent = `Jornada ${i+1}: ${j.paquetes.length} paquetes (${j.inicio})`;
-    lista.appendChild(li);
-  });
-}
-
-// =========================
-// OCR / QR simulación
-// =========================
-function subirOCR() {
-  let input = document.createElement("input");
-  input.type = "file";
-  input.accept = "image/*";
-  input.onchange = e => {
-    let file = e.target.files[0];
-    Tesseract.recognize(file, 'spa').then(res => {
-      document.getElementById('ruta').value = res.data.text.trim();
-    });
-  };
-  input.click();
-}
-
-function escanearQR() {
-  let vin = prompt("Introduce VIN manual (QR pendiente)");
-  if (vin) document.getElementById("vin").value = vin;
-}
-
-// =========================
-// Navegación
-// =========================
-function mostrarSeccion(id) {
-  document.querySelectorAll(".seccion").forEach(s => s.classList.remove("activa"));
-  document.getElementById(id).classList.add("activa");
-}
-
-document.getElementById("openSidebar").onclick = () => {
-  document.getElementById("sidebar").classList.add("activo");
-};
-document.getElementById("closeSidebar").onclick = () => {
-  document.getElementById("sidebar").classList.remove("activo");
-};
-
-document.getElementById("btnIniciar").onclick = iniciarJornada;
-document.getElementById("btnFinalizar").onclick = finalizarJornada;
-document.getElementById("btnNuevoPaquete").onclick = abrirModal;
-document.getElementById("cerrarModal").onclick = cerrarModal;
-document.getElementById("guardarPaquete").onclick = guardarPaquete;
-
-window.onload = actualizarHistorico;
+// Agregar paquete
+function agregarPaquete(){
+  const p = {
+    seguimiento: document.getElementById('pkgSeguimiento').value,
+    direccion: document.getElementById('pkgDireccion').value,
+    tipo: document.getElementById('pkgTipo').value,
+    mala: document.getElementById('pkgMala').checked,
+    entregado: document.getElementById('pkgEntregado').checked,
+    notas: document.getElementById('pkgNotas
