@@ -1,4 +1,5 @@
-//utilizar en html
+// UTILIZAR EN HTML
+/**
 <button id="btnUbicacion">Capturar Ubicación</button>
 
 <script type="module">
@@ -10,7 +11,8 @@ document.getElementById('btnUbicacion').addEventListener('click', () => {
         // Aquí podrías enviarlo a jornadasGPS.js para guardar
     });
 });
-</script>/*
+</script>
+*/
 
 // GPS.js
 
