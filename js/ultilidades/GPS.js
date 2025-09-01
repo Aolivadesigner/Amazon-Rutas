@@ -11,36 +11,32 @@ document.getElementById('btnUbicacion').addEventListener('click', () => {
         // Aquí podrías enviarlo a jornadasGPS.js para guardar
     });
 });
-</script>
-*/
+</script>*/
 
 // GPS.js
+import { guardarRegistro } from './guardarJornadasGPS.js';
 
-// Función para capturar ubicación actual
-export function capturarUbicacion(callback) {
-    if (!navigator.geolocation) {
-        alert("Geolocalización no soportada en este navegador.");
-        return;
-    }
+export async function capturarUbicacion() {
+    if (!navigator.geolocation) return alert("GPS no disponible");
 
-    navigator.geolocation.getCurrentPosition(
-        (position) => {
-            const { latitude, longitude, altitude } = position.coords;
-            const hora = new Date().toISOString(); // Formato ISO: YYYY-MM-DDTHH:MM:SS
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        const altura = pos.coords.altitude || 0;
+        const hora = new Date().toISOString();
 
-            const registro = {
-                latitud: latitude,
-                longitud: longitude,
-                altura: altitude || null, // Si no hay, null
-                hora: hora
-            };
+        // Geocoding inverso
+        let direccion = "";
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+            const data = await res.json();
+            direccion = data.display_name || "";
+        } catch (e) {
+            console.error("Error obteniendo dirección:", e);
+        }
 
-            // Devuelve el registro al callback
-            callback(registro);
-        },
-        (error) => {
-            console.error("Error al capturar la ubicación:", error.message);
-        },
-        { enableHighAccuracy: true }
-    );
+        const registro = { lat, lon, altura, hora, direccion };
+        guardarRegistro(registro);
+        console.log("Registro guardado:", registro);
+    }, (err) => console.error("Error GPS:", err), { enableHighAccuracy: true });
 }
