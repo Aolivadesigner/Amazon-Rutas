@@ -1,4 +1,4 @@
-/*COMO USARLO EN HTML*/
+/**COMO USARLO EN HTML
 <script type="module">
   import { guardarJornadaReal, obtenerJornadas } from './js/utilidades/jornadas.js';
 
@@ -14,7 +14,7 @@
   // Leer todas las jornadas
   console.log(obtenerJornadas());
 </script>
-
+*/
 //AQUI COMIENZA EL JS PARA ABAJO
 
 // Guardar jornada en orden cronológico según fecha real
